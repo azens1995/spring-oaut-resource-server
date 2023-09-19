@@ -1,10 +1,32 @@
 package dev.eklak.springresourceserver.config;
 
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
 @Configuration
 @EnableResourceServer // Allows spring boot to configure what's required for our app to become resource server
-public class ResourceServerConfig {
+public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
+    @Autowired
+    private DataSource dataSource;
+
+    @Override
+    public void configure(ResourceServerSecurityConfigurer resources) throws
+        Exception {
+        // Configures the token store
+        resources.tokenStore(tokenStore());
+    }
+
+    @Bean
+    public TokenStore tokenStore() {
+        // Create the JDBC Token store based on the datasource
+        return new JdbcTokenStore(dataSource);
+    }
 }
